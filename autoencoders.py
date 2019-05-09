@@ -18,7 +18,8 @@ import json
 import numpy as np
 import tensorflow as tf
 from sklearn.base import BaseEstimator
-
+tf_major_ver = int(tf.__version__.split(".")[0])
+tf_minor_ver = int(tf.__version__.split(".")[1])
 
 class BaseAutoencoder(BaseEstimator):
 	"""Base class for autoencoders"""
@@ -129,15 +130,24 @@ class BaseAutoencoder(BaseEstimator):
 			# self.loss = tf.mul(0.5, tf.reduce_sum(tf.square(tf.subtract(self.z, self.x))), 
 			self.loss = tf.reduce_mean(tf.square(tf.subtract(self.z, self.x)),	
 				name='Reconstruction_loss')
-			tf.summary.scalar(self.loss.op.name, self.loss)
+			if(tf_major_ver==0 and tf_minor_ver<11):
+				tf.scalar_summary(self.loss.op.name, self.loss)
+			else:
+				tf.summary.scalar(self.loss.op.name, self.loss)
 
 			self.optimize_op = self.optimizer.minimize(self.loss)
-
-			self.init_op = tf.global_variables_initializer()
+			if(tf_major_ver==0 and tf_minor_ver<12):
+				self.init_op = tf.initialize_all_variables()
+			else:
+				self.init_op = tf.global_variables_initializer()
 			# To save model
 			self.saver = tf.train.Saver()
 			# Summary writer for tensorboard
-			self.summary_op = tf.summary.merge_all()
+			if(tf_major_ver==0 and tf_minor_ver<12):
+				self.summary_op = tf.merge_all_summaries()
+			else:
+				self.summary_op = tf.summary.merge_all()
+			
 
 
 	def _init_variables(self):
@@ -349,15 +359,23 @@ class AdditiveGaussianNoiseAutoencoder(BaseAutoencoder):
 			# self.loss = tf.mul(0.5, tf.reduce_sum(tf.square(tf.subtract(self.z, self.x))), 
 			self.loss = tf.reduce_mean(tf.square(tf.subtract(self.z, self.x)),
 				name='Reconstruction_loss')
-			tf.summary.scalar(self.loss.op.name, self.loss)
+			if(tf_major_ver==0 and tf_minor_ver<11):
+				tf.scalar_summary(self.loss.op.name, self.loss)
+			else:
+				tf.summary.scalar(self.loss.op.name, self.loss)
 
 			self.optimize_op = self.optimizer.minimize(self.loss)
-
-			self.init_op = tf.global_variables_initializer()
+			if(tf_major_ver==0 and tf_minor_ver<12):
+				self.init_op = tf.initialize_all_variables()
+			else:
+				self.init_op = tf.global_variables_initializer()
 			# To save model
 			self.saver = tf.train.Saver()
 			# Summary writer for tensorboard
-			self.summary_op = tf.summary.merge_all()
+			if(tf_major_ver==0 and tf_minor_ver<12):
+				self.summary_op = tf.merge_all_summaries()
+			else:
+				self.summary_op = tf.summary.merge_all()
 
 
 class MaskingNoiseAutoencoder(BaseAutoencoder):
@@ -445,15 +463,24 @@ class MaskingNoiseAutoencoder(BaseAutoencoder):
 			# self.loss = tf.mul(0.5, tf.reduce_sum(tf.square(tf.subtract(self.z, self.x))), 
 			self.loss = tf.reduce_mean(tf.square(tf.subtract(self.z, self.x)),
 				name='Reconstruction_loss')
-			tf.summary.scalar(self.loss.op.name, self.loss)
+			if(tf_major_ver==0 and tf_minor_ver<11):
+				tf.scalar_summary(self.loss.op.name, self.loss)
+			else:
+				tf.summary.scalar(self.loss.op.name, self.loss)
 
 			self.optimize_op = self.optimizer.minimize(self.loss)
 
-			self.init_op = tf.global_variables_initializer()
+			if(tf_major_ver==0 and tf_minor_ver<12):
+				self.init_op = tf.initialize_all_variables()
+			else:
+				self.init_op = tf.global_variables_initializer()
 			# To save model
 			self.saver = tf.train.Saver()
 			# Summary writer for tensorboard
-			self.summary_op = tf.summary.merge_all()
+			if(tf_major_ver==0 and tf_minor_ver<12):
+				self.summary_op = tf.merge_all_summaries()
+			else:
+				self.summary_op = tf.summary.merge_all()
 
 	def partial_fit(self, X):
 		if self._to_write_summary():
@@ -545,7 +572,10 @@ class DualObjectiveAutoencoder(object):
 		self.loss = self.reconstruction_loss + self.supervised_loss
 		self.optimizer = optimizer.minimize(self.loss)
 
-		init_op = tf.global_variables_initializer()
+		if(tf_major_ver==0 and tf_minor_ver<12):
+			init_op = tf.initialize_all_variables()
+		else:
+			init_op = tf.global_variables_initializer()
 		self.sess = tf.Session()
 		self.sess.run(init_op)
 

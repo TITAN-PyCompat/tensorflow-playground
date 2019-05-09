@@ -24,7 +24,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 SEED = 2019
 random.seed(SEED)
 np.random.seed(SEED)
-
+tf_major_ver = int(tf.__version__.split(".")[0])
+tf_minor_ver = int(tf.__version__.split(".")[1])
 # Utils 
 def parse_activation_function(function_name):
     '''Given activation funtion name (e.g. tanh, sigmoid, ...), 
@@ -146,7 +147,10 @@ class NVDM(BaseEstimator, TransformerMixin):
             self.optim_dec = optimizer.apply_gradients(zip(dec_grads, dec_vars))
 
             # init op 
-            self.init_op = tf.global_variables_initializer()
+            if(tf_major_ver==0 and tf_minor_ver<12):
+	            self.init_op = tf.initialize_all_variables()
+            else:
+                self.init_op = tf.global_variables_initializer()
             # create a saver 
             self.saver = tf.train.Saver()
 
